@@ -15,44 +15,35 @@ const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleImageCapture = async (imageData) => {
-    setIsSearching(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      const mockResults = [
-        {
-          id: 1,
-          name: "Modern Minimalist Chair",
-          price: "$249.99",
-          store: "Walmart",
-          confidence: 95,
-          image: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop",
-          category: "Furniture"
-        },
-        {
-          id: 2,
-          name: "Similar Accent Chair",
-          price: "$189.99",
-          store: "Target",
-          confidence: 87,
-          image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=300&h=300&fit=crop",
-          category: "Furniture"
-        },
-        {
-          id: 3,
-          name: "Designer Office Chair",
-          price: "$329.99",
-          store: "Best Buy",
-          confidence: 78,
-          image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=300&h=300&fit=crop",
-          category: "Furniture"
-        }
-      ];
-      setSearchResults(mockResults);
-      setIsSearching(false);
-      setActiveTab('results');
-    }, 2000);
-  };
+ const handleImageCapture = async (imageData) => {
+  setIsSearching(true);
+
+  try {
+    // Convert base64 to blob
+    const res = await fetch(imageData);
+    const blob = await res.blob();
+
+    const formData = new FormData();
+    formData.append("file", blob, "captured-image.png"); // name = file (required by multer)
+
+    const response = await fetch("http://localhost:3000/upload-image", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    setSearchResults(data.similarProducts || []);
+    setIsSearching(false);
+    setActiveTab("results");
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    setIsSearching(false);
+    alert("Something went wrong while searching.");
+  }
+};
+
+
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];

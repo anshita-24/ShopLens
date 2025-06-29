@@ -1,18 +1,9 @@
-# Node.js
-backend/node_modules/
-backend/uploads/
-backend/.env
-
-# Python
-ml/venv*/
-ml/__pycache__/
-ml/*.pkl
-ml/*.npy
-ml/.env
-
-# System files
-.DS_Store
-Thumbs.db
-
-# VSCode
-.vscode/
+# Ignore node modules and virtual environments
+node_modules/
+venv/
+venv310/
+Frontend/node_modules/
+Backend/node_modules/
+ML/venv310/
+uploads/
+.env
