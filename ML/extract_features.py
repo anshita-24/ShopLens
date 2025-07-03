@@ -1,33 +1,54 @@
 import os
+import json
 import numpy as np
-import pickle
+from PIL import Image
+from pymongo import MongoClient
 from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
 from tensorflow.keras.preprocessing import image
-from PIL import Image
 
-# Load pre-trained model without the final classification layer
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="../backend/.env")
+mongo_uri = os.getenv("MONGODB_URI")
+# 🧠 Load ResNet50 model
 model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
-# Folder where images are stored
-image_folder = 'images'
-features = []
-filenames = []
+# 📂 Path to image folder and metadata file
+image_folder = '../backend/public/products'
+json_path = '../backend/data/mockProducts.json'
 
-for img_name in os.listdir(image_folder):
-    img_path = os.path.join(image_folder, img_name)
-    img = Image.open(img_path).resize((224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
 
-    feature_vector = model.predict(img_array)
-    features.append(feature_vector[0])
-    filenames.append(img_name)
+# 🍃 Connect to MongoDB
+client = MongoClient(mongo_uri)
+db = client['shoplens']
+collection = db['products']
 
-# Save features and filenames
-np.save('features.npy', np.array(features))
+# 🔁 Load metadata
+with open(json_path, 'r', encoding='utf-8') as f:
+    products = json.load(f)
 
-with open('filenames.pkl', 'wb') as f:
-    pickle.dump(filenames, f)
 
-print("✅ Features and filenames saved successfully!")
+
+# 🎯 Extract and insert features
+for product in products:
+    img_path = os.path.join(image_folder, product['image'])
+    try:
+        img = Image.open(img_path).resize((224, 224)).convert('RGB')
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = preprocess_input(img_array)
+
+        # Extract feature vector
+        feature_vector = model.predict(img_array)[0].tolist()  # convert to list for MongoDB
+
+        # Add feature vector to product data
+        product['featureVector'] = feature_vector
+
+        # Insert into MongoDB
+        collection.insert_one(product)
+
+        print(f"✅ Inserted: {product['title']}")
+    except Exception as e:
+        print(f"❌ Failed for {product['image']}: {e}")
+
+print("\n🎉 All product features stored in MongoDB!")
