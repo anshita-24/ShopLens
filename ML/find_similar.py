@@ -23,22 +23,31 @@ img = Image.open(img_path).resize((224, 224)).convert('RGB')
 img_array = image.img_to_array(img)
 img_array = np.expand_dims(img_array, axis=0)
 img_array = preprocess_input(img_array)
-query_vector = model.predict(img_array)[0].reshape(1, -1)
+query_vector = model.predict(img_array, verbose=0)[0].reshape(1, -1)
 
 # Connect to MongoDB
 client = MongoClient(mongo_uri)
 db = client['shoplens']
 collection = db['products']
 
-
-# Fetch all products and their feature vectors
-products = list(collection.find({}, {'_id': 0}))  # exclude _id
+# Fetch products and vectors
+products = list(collection.find({}, {'_id': 0}))
 product_vectors = np.array([p['featureVector'] for p in products])
 
 # Compute similarity
 similarities = cosine_similarity(query_vector, product_vectors)[0]
 top_indices = np.argsort(similarities)[-5:][::-1]
 
-# Return top 5 similar products
-top_products = [products[i] for i in top_indices]
+# Select top products (exclude featureVector)
+top_products = []
+for i in top_indices:
+    p = products[i]
+    product_data = {
+        "title": p.get("title", ""),
+        "price": p.get("price", ""),
+        "image": p.get("image", ""),
+        "link": p.get("link", "")
+    }
+    top_products.append(product_data)
+
 print(json.dumps(top_products))

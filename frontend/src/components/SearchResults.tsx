@@ -1,9 +1,10 @@
-
 import React from 'react';
 import { ArrowLeft, Star, ShoppingBag, ExternalLink, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+
+const BACKEND_URL = "http://localhost:3000";
 
 const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
   if (isLoading) {
@@ -46,59 +47,65 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
 
       {/* Results Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {results.map((product, index) => (
-          <Card 
-            key={product.id}
-            className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
-            onClick={() => onProductSelect(product)}
-          >
-            <div className="relative">
-              <img 
-                src={product.image} 
-                alt={product.name}
-                className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
-              />
-              <Badge 
-                className="absolute top-3 right-3 bg-green-500 text-white"
-              >
-                {product.confidence}% match
-              </Badge>
-            </div>
-            <CardContent className="p-4 space-y-3">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors">
-                  {product.name}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-green-600">{product.price}</span>
-                  <Badge variant="secondary">{product.store}</Badge>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`h-4 w-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">4.2 (156 reviews)</span>
-              </div>
+        {results.map((product, index) => {
+          const imageUrl = product.image.startsWith("http")
+            ? product.image
+            : `${BACKEND_URL}/products/${product.image}`;
 
-              <div className="flex space-x-2 pt-2">
-                <Button size="sm" className="flex-1">
-                  <ShoppingBag className="h-4 w-4 mr-1" />
-                  View Details
-                </Button>
-                <Button size="sm" variant="outline">
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
+          return (
+            <Card 
+              key={product.id || index}
+              className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              onClick={() => onProductSelect(product)}
+            >
+              <div className="relative">
+                <img 
+                  src={imageUrl} 
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
+                />
+                <Badge 
+                  className="absolute top-3 right-3 bg-green-500 text-white"
+                >
+                  {product.confidence}% match
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              <CardContent className="p-4 space-y-3">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-green-600">{product.price}</span>
+                    <Badge variant="secondary">{product.store}</Badge>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`h-4 w-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">4.2 (156 reviews)</span>
+                </div>
+
+                <div className="flex space-x-2 pt-2">
+                  <Button size="sm" className="flex-1">
+                    <ShoppingBag className="h-4 w-4 mr-1" />
+                    View Details
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Load More */}

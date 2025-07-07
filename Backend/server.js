@@ -47,9 +47,12 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
   const imagePath = path.join(__dirname, req.file.path);
 
   try {
-    // Call Python script to find similar products
+    // ✅ Use correct Python path from venv310
     const { spawn } = require('child_process');
-    const py = spawn('python', ['../ml/find_similar.py', imagePath]);
+    const py = spawn(
+      'C:/Users/Hp/OneDrive/Desktop/ShopLens/ML/venv310/Scripts/python.exe',
+      [path.join(__dirname, '../ml/find_similar.py'), imagePath]
+    );
 
     let data = '';
     py.stdout.on('data', (chunk) => {
@@ -62,13 +65,14 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
 
     py.on('close', (code) => {
       try {
+        console.log('🐍 Raw Python output:', data);
         const similarProducts = JSON.parse(data);
         const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
         res.json({
           uploaded: req.file.originalname,
           imageUrl,
-          similar: similarProducts
+          similarProducts: similarProducts
         });
       } catch (e) {
         console.error('❌ JSON parse error:', e);
