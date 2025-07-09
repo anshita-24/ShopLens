@@ -3,6 +3,7 @@ const multer = require('multer');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const { ObjectId } = require('mongodb');
 require('dotenv').config(); // Load .env file
 
 const app = express();
@@ -25,7 +26,7 @@ const Product = mongoose.model('Product', new mongoose.Schema({
   price: String,
   link: String,
   style: String,
-  featureVector: [Number] // store array of floats
+  featureVector: [Number]
 }));
 
 // Multer for image uploads
@@ -47,7 +48,6 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
   const imagePath = path.join(__dirname, req.file.path);
 
   try {
-    // ✅ Use correct Python path from venv310
     const { spawn } = require('child_process');
     const py = spawn(
       'C:/Users/Hp/OneDrive/Desktop/ShopLens/ML/venv310/Scripts/python.exe',
@@ -63,22 +63,39 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
       console.error(`⚠️ Python error: ${err}`);
     });
 
-    py.on('close', (code) => {
+    py.on('close', async () => {
       try {
         console.log('🐍 Raw Python output:', data);
-        const similarProducts = JSON.parse(data);
-        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        const similarIds = JSON.parse(data); // list of _id strings
+        const objectIds = similarIds.map(id => new ObjectId(id));
 
+        // Fetch matched products from DB
+        const matchedProducts = await Product.find({ _id: { $in: objectIds } });
+
+        if (!matchedProducts.length) {
+          console.log("❌ No products matched those IDs");
+          return res.json({ similarProducts: [] });
+        }
+
+        // ✅ Extract style from the top match
+        const matchedStyle = matchedProducts[0].style;
+        console.log("📎 Extracted Style:", matchedStyle);
+
+        // Filter only products of the same style
+        const filteredProducts = matchedProducts.filter(p => p.style === matchedStyle);
+
+        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
         res.json({
           uploaded: req.file.originalname,
           imageUrl,
-          similarProducts: similarProducts
+          similarProducts: filteredProducts
         });
       } catch (e) {
-        console.error('❌ JSON parse error:', e);
-        res.status(500).json({ error: 'Failed to parse Python response' });
+        console.error('❌ JSON parse error or fetch error:', e);
+        res.status(500).json({ error: 'Failed to parse or filter similar products' });
       }
     });
+
   } catch (e) {
     res.status(500).json({ error: 'Something went wrong with ML pipeline' });
   }
