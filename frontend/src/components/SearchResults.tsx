@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Star, ShoppingBag, ExternalLink, Filter } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
           </Button>
           <h2 className="text-2xl font-bold">Analyzing Image...</h2>
         </div>
-        
+
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <h3 className="text-lg font-semibold mb-2">AI Processing Your Image</h3>
@@ -53,55 +53,54 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
             : `${BACKEND_URL}/products/${product.image}`;
 
           return (
-            <Card 
-              key={product.id || index}
-              className="hover:shadow-lg transition-all duration-300 cursor-pointer group"
-              onClick={() => onProductSelect(product)}
+            <Card
+              key={product._id || index}
+              className="hover:shadow-lg transition-all duration-300 group"
             >
               <div className="relative">
-                <img 
-                  src={imageUrl} 
-                  alt={product.name}
+                <img
+                  src={imageUrl}
+                  alt={product.title}
                   className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                 />
-                <Badge 
-                  className="absolute top-3 right-3 bg-green-500 text-white"
-                >
-                  {product.confidence}% match
+                <Badge className="absolute top-3 right-3 bg-green-500 text-white">
+                  Similar
                 </Badge>
               </div>
               <CardContent className="p-4 space-y-3">
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <h3 className="font-semibold text-lg group-hover:text-blue-600 transition-colors">
-                    {product.name}
+                    {product.title}
                   </h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-green-600">{product.price}</span>
-                    <Badge variant="secondary">{product.store}</Badge>
+                    <span className="text-xl font-bold text-green-600">{product.price}</span>
+                    <Badge variant="secondary">{product.style}</Badge>
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`h-4 w-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">4.2 (156 reviews)</span>
                 </div>
 
-                <div className="flex space-x-2 pt-2">
-                  <Button size="sm" className="flex-1">
-                    <ShoppingBag className="h-4 w-4 mr-1" />
-                    View Details
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
+                {/* Subtle product tagline */}
+                <p className="text-sm text-gray-500 pt-1">
+                  Trending pick for your style – AI matched this with confidence.
+                </p>
+
+                {/* Walmart Button */}
+                {product.link && (
+                  <a
+                    href={product.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block pt-2"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center border border-purple-600 text-purple-700 hover:bg-purple-50"
+                      size="sm"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View on Walmart
+                    </Button>
+                  </a>
+                )}
               </CardContent>
             </Card>
           );
