@@ -4,17 +4,17 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const { ObjectId } = require('mongodb');
-require('dotenv').config(); // Load .env file
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // To parse JSON body
+app.use(express.json());
 
 // Serve static files from uploads/ and public/products/
 app.use('/uploads', express.static('uploads'));
 app.use('/products', express.static(path.join(__dirname, 'public/products')));
 
-// MongoDB connection using Atlas URI from .env
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
@@ -29,7 +29,7 @@ const Product = mongoose.model('Product', new mongoose.Schema({
   featureVector: [Number]
 }));
 
-// Multer for image uploads
+// Multer config for file uploads
 const storage = multer.diskStorage({
   destination: 'uploads/',
   filename: (req, file, cb) => {
@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Endpoint: POST /upload-image
+// POST /upload-image
 app.post('/upload-image', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -66,29 +66,31 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
     py.on('close', async () => {
       try {
         console.log('🐍 Raw Python output:', data);
-        const similarIds = JSON.parse(data); // list of _id strings
+        const similarIds = JSON.parse(data);
         const objectIds = similarIds.map(id => new ObjectId(id));
 
-        // Fetch matched products from DB
         const matchedProducts = await Product.find({ _id: { $in: objectIds } });
-
         if (!matchedProducts.length) {
           console.log("❌ No products matched those IDs");
           return res.json({ similarProducts: [] });
         }
 
-        // ✅ Extract style from the top match
         const matchedStyle = matchedProducts[0].style;
         console.log("📎 Extracted Style:", matchedStyle);
 
-        // Filter only products of the same style
         const filteredProducts = matchedProducts.filter(p => p.style === matchedStyle);
-
         const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+        // ✅ Attach imageUrl to each product
+        const result = filteredProducts.map(p => ({
+          ...p.toObject(),
+          imageUrl: imageUrl
+        }));
+
         res.json({
           uploaded: req.file.originalname,
           imageUrl,
-          similarProducts: filteredProducts
+          similarProducts: result
         });
       } catch (e) {
         console.error('❌ JSON parse error or fetch error:', e);
@@ -101,7 +103,7 @@ app.post('/upload-image', upload.single('file'), async (req, res) => {
   }
 });
 
-// Endpoint: GET /products
+// GET /products
 app.get('/products', async (req, res) => {
   try {
     const products = await Product.find();
