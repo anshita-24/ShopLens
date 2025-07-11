@@ -70,33 +70,6 @@
 
 ---
 
-## 📁 Folder Structure
-
-ShopLens-main/
-│
-├── Backend/ # Node.js + Express server
-│ ├── server.js
-│ └── package.json, data/, public/
-│
-├── frontend/ # Vite + React + Tailwind frontend
-│ ├── src/, public/
-│ ├── index.html, vite.config.ts
-│ └── tailwind.config.ts, tsconfig files
-│
-├── ML/ # Python scripts for feature extraction
-│ ├── extract_features.py
-│ ├── find_similar.py
-│ └── clear_products.py
-│
-├── .gitignore
-└── README.md
-
-yaml
-Copy
-Edit
-
----
-
 ## 🛠️ How to Run Locally
 
 ### 🔧 Backend
@@ -133,10 +106,4 @@ Made by Anshima Singh
 Drop a ⭐ if you liked it, or feel free to contribute!
 
 📄 License
-MIT License © 2025 Anshima Singh
-
-yaml
-Copy
-Edit
-
----
+MIT License © 2025 ShopLens
