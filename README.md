@@ -1,13 +1,23 @@
 # 🛍️ ShopLens – Your Visual AI Shopping Assistant ;) 
 
-**ShopLens** helps users find visually similar products on **Walmart** by simply uploading or clicking a picture of an item they don’t know the name of. Whether it’s a piece of furniture, an electronic gadget, a kitchen tool, or a fashion item — ShopLens uses image-based search powered by machine learning to connect users with lookalike products directly from Walmart.
+**ShopLens** helps users find visually similar products on **Walmart** by simply uploading or clicking a picture of an item they don’t know the name of or want to shop an exactly similar item. Whether it’s a piece of furniture, an electronic gadget, a kitchen tool, or a fashion item — ShopLens uses image-based search powered by machine learning to connect users with lookalike products directly from Walmart.
 
 ---
 
+## ⚙️ Features
+
+- 🧠 AI/ML powered product similarity detection
+- 🔍 Visual search for any item — not just fashion
+- 🔗 Live redirection to Walmart product links
+- 🌐 Built with modern web tools (Vite + React + Tailwind)
+- 💡 Scalable, modular project structure
+- 🎯 Ideal for visually-driven shopping experiences
+
+---
 ## 📸 How It Works – Visual Product Search
 
 ### Step 1: Upload or Click a Picture  
-> *"I found this cool product, but I don’t know what it's called!"*  
+> *"I found this cool product and want to buy similar items !"*  
 📷 Upload or click a picture of any unknown item directly in the app.
 
 🖼️ `...space for image/screenshot of our prototype interface...`
@@ -40,16 +50,6 @@
 
 ---
 
-## ⚙️ Features
-
-- 🧠 AI/ML powered product similarity detection
-- 🔍 Visual search for any item — not just fashion
-- 🔗 Live redirection to Walmart product links
-- 🌐 Built with modern web tools (Vite + React + Tailwind)
-- 💡 Scalable, modular project structure
-- 🎯 Ideal for visually-driven shopping experiences
-
----
 
 ## 💡 Why These Tech Stacks? – Q&A Format
 
@@ -70,40 +70,4 @@
 
 ---
 
-## 🛠️ How to Run Locally
 
-### 🔧 Backend
-```bash
-cd Backend
-npm install
-node server.js
-🎨 Frontend
-bash
-Copy
-Edit
-cd frontend
-npm install
-npm run dev
-🧠 ML Scripts (Python)
-bash
-Copy
-Edit
-cd ML
-python clear_products.py         # Clean product data
-python extract_features.py       # Generate embeddings
-python find_similar.py           # Find visually similar Walmart products
-🔮 Future Additions
-🔐 User Authentication
-
-🌍 Support for Amazon and Flipkart
-
-📱 Mobile PWA version
-
-🧠 CLIP/DINOv2 integration for better results
-
-🙌 Built With Love
-Made by Anshima Singh
-Drop a ⭐ if you liked it, or feel free to contribute!
-
-📄 License
-MIT License © 2025 ShopLens
