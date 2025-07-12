@@ -6,7 +6,21 @@ import { Badge } from '@/components/ui/badge';
 
 const BACKEND_URL = "http://localhost:3000";
 
-const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
+type Props = {
+  results: any[];
+  isLoading: boolean;
+  uploadedImageUrl: string;
+  onProductSelect: (product: any) => void;
+  onBack: () => void;
+};
+
+const SearchResults: React.FC<Props> = ({
+  results,
+  isLoading,
+  uploadedImageUrl,
+  onProductSelect,
+  onBack
+}) => {
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -45,6 +59,18 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
         </Button>
       </div>
 
+      {/* Uploaded Image */}
+      {uploadedImageUrl && (
+        <div className="rounded-lg border p-4 bg-white text-center shadow-sm">
+          <p className="text-sm text-gray-600 mb-2 font-medium">Uploaded Image</p>
+          <img
+            src={uploadedImageUrl}
+            alt="Uploaded"
+            className="max-h-[300px] mx-auto object-contain rounded-lg border"
+          />
+        </div>
+      )}
+
       {/* Results Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results.map((product, index) => {
@@ -56,12 +82,13 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
             <Card
               key={product._id || index}
               className="hover:shadow-lg transition-all duration-300 group"
+              onClick={() => onProductSelect(product)}
             >
               <div className="relative">
                 <img
                   src={imageUrl}
                   alt={product.title}
-                  className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-[300px] object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                 />
                 <Badge className="absolute top-3 right-3 bg-green-500 text-white">
                   Similar
@@ -78,11 +105,6 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
                   </div>
                 </div>
 
-                {/* Subtle product tagline */}
-                <p className="text-sm text-gray-500 pt-1">
-                  Trending pick for your style – AI matched this with confidence.
-                </p>
-
                 {/* Walmart Button */}
                 {product.link && (
                   <a
@@ -90,6 +112,7 @@ const SearchResults = ({ results, isLoading, onProductSelect, onBack }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block pt-2"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <Button
                       variant="outline"

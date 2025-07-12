@@ -1,8 +1,7 @@
-
-import React, { useState, useRef } from 'react';
-import { Camera, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useRef, useEffect } from "react";
+import { Camera, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const CameraCapture = ({ onCapture }) => {
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -13,44 +12,58 @@ const CameraCapture = ({ onCapture }) => {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } // Use back camera on mobile
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Camera not supported in this browser.");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }, // or 'user' for front cam
+        audio: false,
       });
+
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+
+        // wait for metadata to load before playing
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().catch((err) => {
+            console.error("Play error:", err);
+          });
+        };
       }
+
       setIsCameraActive(true);
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions.');
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Could not access camera. Check permissions or device settings.");
     }
   };
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
     }
     setIsCameraActive(false);
-    setCapturedImage(null);
   };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0);
-      
-      const imageData = canvas.toDataURL('image/jpeg');
-      setCapturedImage(imageData);
-      stopCamera();
-      onCapture(imageData);
-    }
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = canvas.toDataURL("image/jpeg");
+    setCapturedImage(imageData);
+    stopCamera();
+    onCapture(imageData);
   };
 
   const retakePhoto = () => {
@@ -66,13 +79,15 @@ const CameraCapture = ({ onCapture }) => {
         </div>
         <CardTitle>Camera Search</CardTitle>
       </CardHeader>
+
       <CardContent className="space-y-4">
+        {/* Initial Button */}
         {!isCameraActive && !capturedImage && (
           <div className="text-center space-y-4">
             <p className="text-gray-600">
               Point your camera at any product to find similar items and get recommendations.
             </p>
-            <Button 
+            <Button
               onClick={startCamera}
               className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
             >
@@ -82,6 +97,7 @@ const CameraCapture = ({ onCapture }) => {
           </div>
         )}
 
+        {/* Live Camera Feed */}
         {isCameraActive && (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black">
@@ -89,6 +105,7 @@ const CameraCapture = ({ onCapture }) => {
                 ref={videoRef}
                 autoPlay
                 playsInline
+                muted
                 className="w-full h-64 object-cover"
               />
               <Button
@@ -111,12 +128,13 @@ const CameraCapture = ({ onCapture }) => {
           </div>
         )}
 
+        {/* Captured Image Preview */}
         {capturedImage && (
           <div className="space-y-4">
             <div className="rounded-lg overflow-hidden">
-              <img 
-                src={capturedImage} 
-                alt="Captured" 
+              <img
+                src={capturedImage}
+                alt="Captured"
                 className="w-full h-64 object-cover"
               />
             </div>
@@ -131,7 +149,7 @@ const CameraCapture = ({ onCapture }) => {
           </div>
         )}
 
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
       </CardContent>
     </Card>
   );
