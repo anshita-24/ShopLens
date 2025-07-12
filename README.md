@@ -22,14 +22,9 @@
 
 ---
 
-### Step 2: Image Feature Extraction  
-🔬 Our ML pipeline processes the image and extracts its visual features using pretrained models like ResNet or CNN variants. These features are then converted into vectors.
 
-![Process Screenshot](./Screenshots/SS2.jpg)
 
----
-
-### Step 3: Find Similar Products  
+### Step 2: Find Similar Products  
 🧠 Using cosine similarity, we match the vector against a dataset of Walmart products and retrieve the most visually similar items.
 
 ![Matching Results Screenshot 1](./Screenshots/SS3.0.jpg)<br/>
@@ -38,7 +33,7 @@
 
 ---
 
-### Step 4: Visit Product Page  
+### Step 3: Visit Product Page  
 🔗 Want to buy it? Click the result and get redirected to the official Walmart product page.
 
 ![Walmart Redirect Screenshot](./Screenshots/SS4.jpg)
